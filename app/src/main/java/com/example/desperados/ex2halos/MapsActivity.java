@@ -28,6 +28,9 @@ package com.example.desperados.ex2halos;
 
         import java.lang.Math;
         import java.text.DecimalFormat;
+        import java.util.ArrayList;
+        import java.util.Iterator;
+        import java.util.List;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -62,6 +65,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        final List<Circle> mCircles = new ArrayList<Circle>();
+
         //Added automatically
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -94,6 +99,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         editor.commit();
 
                         shape = drawCircle(loc);
+                        mCircles.add(shape);
 
                     }
                 }
@@ -112,6 +118,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     public void onCameraChange(CameraPosition cameraPosition){
                         //shape = drawCircle(mMap.getCameraPosition().target);
                         //shape.setRadius(1000);
+
+                        Log.i("How many circles", "" + mCircles.size());
+                        for(int i=0; i < mCircles.size(); i++) {
+                            Circle object = mCircles.get(i);
+
+                            Location markerLoc = new Location("Marker");
+                            markerLoc.setLatitude(object.getCenter().latitude);
+                            markerLoc.setLongitude(object.getCenter().longitude);
+
+                            Location centerLoc = new Location("Center");
+                            centerLoc.setLatitude(mMap.getCameraPosition().target.latitude);
+                            centerLoc.setLongitude(mMap.getCameraPosition().target.longitude);
+
+                            Float distance = centerLoc.distanceTo(markerLoc);
+
+                            object.setRadius(distance);
+
+                        }
+
+
+
                     }
                 }
 
@@ -125,7 +152,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private Circle drawCircle(LatLng loc) {
 
-        Location markerLoc = new Location("Marker");
+/*        Location markerLoc = new Location("Marker");
         markerLoc.setLatitude(loc.latitude);
         markerLoc.setLongitude(loc.longitude);
 
@@ -133,12 +160,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         centerLoc.setLatitude(mMap.getCameraPosition().target.latitude);
         centerLoc.setLongitude(mMap.getCameraPosition().target.longitude);
 
-        Float distance = centerLoc.distanceTo(markerLoc);
+        Float distance = centerLoc.distanceTo(markerLoc);*/
 
 
         CircleOptions options = new CircleOptions()
                 .center(loc)
-                .radius(distance)
+                .radius(10000)
                 .fillColor(0x33000FF)
                 .strokeColor(Color.BLUE)
                 .strokeWidth(3);
