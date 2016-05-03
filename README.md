@@ -1,1 +1,0 @@
-# mis-2016-exercise-2-maps-halos
