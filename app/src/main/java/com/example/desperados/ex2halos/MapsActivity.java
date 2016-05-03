@@ -5,11 +5,14 @@ package com.example.desperados.ex2halos;
         import android.content.SharedPreferences;
         import android.content.pm.PackageManager;
         import android.graphics.Color;
+        import android.graphics.Point;
         import android.location.Location;
         import android.support.v4.app.ActivityCompat;
         import android.support.v4.app.FragmentActivity;
         import android.os.Bundle;
+        import android.util.DisplayMetrics;
         import android.util.Log;
+        import android.view.Display;
         import android.widget.EditText;
 
 
@@ -39,6 +42,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static EditText et_marker;
     public Circle shape;
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,6 +72,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         final List<Circle> mCircles = new ArrayList<Circle>();
+
+
+
+
+
 
         //Added automatically
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -132,14 +142,50 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             centerLoc.setLatitude(mMap.getCameraPosition().target.latitude);
                             centerLoc.setLongitude(mMap.getCameraPosition().target.longitude);
 
-                            Projection projection = mMap.getProjection();
-
-
-                            Log.i("Proj coord", "" +  projection.toScreenLocation(object.getCenter()) );
-
                             Float distance = centerLoc.distanceTo(markerLoc);
 
-/*                            dx = abs(object.getCenter().longitude - mMap.getCameraPosition().target.longitude);
+
+
+                            Projection projection = mMap.getProjection();
+
+                            Display mDisp = getWindowManager().getDefaultDisplay();
+                            Point mDispSize = new Point();
+                            mDisp.getSize(mDispSize);
+                            float cent_screen_x = mDispSize.x/2;
+                            float cent_screen_y = mDispSize.y/2;
+
+                            Point mark_screen = projection.toScreenLocation(object.getCenter());
+                            float mark_screen_x = mark_screen.x;
+                            float mark_screen_y = mark_screen.y;
+
+                            float dx = Math.abs(mark_screen_x - cent_screen_x);
+                            float dy = Math.abs(mark_screen_y - cent_screen_y);
+
+                            float ox = dx - ((mDispSize.x / 2) - 100);
+                            float oy = dy - ((mDispSize.y / 2) - 100);
+
+                            if (ox < 0) ox = 0;
+                            if (oy < 0) oy = 0;
+
+                            double radius = Math.sqrt((ox*ox) + (oy*oy));
+                            float zoom = mMap.getCameraPosition().zoom;
+                            double scale = Math.pow(2, zoom);
+                            double alt_dist = radius * scale;
+
+
+                            Log.i("Radius", ""  + alt_dist );
+                            Log.i("Distance", ""  + distance );
+
+
+
+
+
+
+
+
+/*                            Point cent_screen = projection.toScreenLocation(mMap.getCameraPosition());
+
+                            dx = abs(object.getCenter().longitude - mMap.getCameraPosition().target.longitude);
                             dy = abs(object.getCenter().latitude - mMap.getCameraPosition().target.latitude);
 
                             ox = dx - ((screenSize.x / 2) - padding);
@@ -155,7 +201,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
 
-                            object.setRadius(distance);
+                            object.setRadius(alt_dist*1000);
 
                         }
 
