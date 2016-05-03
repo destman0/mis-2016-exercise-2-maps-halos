@@ -24,6 +24,7 @@ package com.example.desperados.ex2halos;
         import com.google.android.gms.maps.model.CircleOptions;
         import com.google.android.gms.maps.model.LatLng;
         import com.google.android.gms.maps.model.MarkerOptions;
+        import com.google.android.gms.maps.Projection;
 
 
         import java.lang.Math;
@@ -119,7 +120,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         //shape = drawCircle(mMap.getCameraPosition().target);
                         //shape.setRadius(1000);
 
-                        Log.i("How many circles", "" + mCircles.size());
+                        /*Log.i("How many circles", "" + mCircles.size());*/
                         for(int i=0; i < mCircles.size(); i++) {
                             Circle object = mCircles.get(i);
 
@@ -131,7 +132,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             centerLoc.setLatitude(mMap.getCameraPosition().target.latitude);
                             centerLoc.setLongitude(mMap.getCameraPosition().target.longitude);
 
+                            Projection projection = mMap.getProjection();
+
+
+                            Log.i("Proj coord", "" +  projection.toScreenLocation(object.getCenter()) );
+
                             Float distance = centerLoc.distanceTo(markerLoc);
+
+/*                            dx = abs(object.getCenter().longitude - mMap.getCameraPosition().target.longitude);
+                            dy = abs(object.getCenter().latitude - mMap.getCameraPosition().target.latitude);
+
+                            ox = dx - ((screenSize.x / 2) - padding);
+                            oy = dy - ((screenSize.y / 2) - padding);
+
+                            if (ox < 0) ox = 0;
+                            if (oy < 0) oy = 0;
+
+                            radius = sqrt((ox*ox) + (oy*oy));*/
+
+
+
+
+
 
                             object.setRadius(distance);
 
