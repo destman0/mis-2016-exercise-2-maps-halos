@@ -1,18 +1,39 @@
 package com.example.desperados.ex2halos;
 
-import android.support.v4.app.FragmentActivity;
-import android.os.Bundle;
+        import android.Manifest;
+        import android.content.Context;
+        import android.content.SharedPreferences;
+        import android.content.pm.PackageManager;
+        import android.graphics.Color;
+        import android.location.Location;
+        import android.support.v4.app.ActivityCompat;
+        import android.support.v4.app.FragmentActivity;
+        import android.os.Bundle;
+        import android.util.Log;
+        import android.widget.EditText;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
+
+        import com.google.android.gms.maps.CameraUpdateFactory;
+        import com.google.android.gms.maps.GoogleMap;
+        import com.google.android.gms.maps.OnMapReadyCallback;
+        import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
+        import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
+        import com.google.android.gms.maps.SupportMapFragment;
+        import com.google.android.gms.maps.model.CameraPosition;
+        import com.google.android.gms.maps.model.Circle;
+        import com.google.android.gms.maps.model.CircleOptions;
+        import com.google.android.gms.maps.model.LatLng;
+        import com.google.android.gms.maps.model.MarkerOptions;
+
+
+        import java.lang.Math;
+        import java.text.DecimalFormat;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
+    private static EditText et_marker;
+    public Circle shape;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,8 +43,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+
     }
 
+
+// Testing after recommit
 
     /**
      * Manipulates the map once available.
@@ -37,10 +62,132 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        //Added automatically
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        mMap.setMyLocationEnabled(true);
+        et_marker = (EditText)findViewById(R.id.et_marker);
+
+
+
+
+        mMap.setOnMapLongClickListener(
+                new GoogleMap.OnMapLongClickListener(){
+                    public void onMapLongClick(LatLng loc) {
+
+                        mMap.addMarker(new MarkerOptions()
+                                .position(loc)
+                                .title(et_marker.getText().toString()));
+                        SharedPreferences sharedPref = MapsActivity.this.getPreferences(Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPref.edit();
+                        editor.putInt("Latitude", (int)loc.latitude);
+                        editor.putInt("Longitude", (int)loc.longitude);
+                        editor.putString("Name",et_marker.getText().toString());
+                        editor.commit();
+
+                        shape = drawCircle(loc);
+
+                    }
+                }
+
+        );
 
         // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        //LatLng berlin = new LatLng(52, 13);
+        // mMap.addMarker(new MarkerOptions().position(berlin).title("Marker in Berlin"));
+        // mMap.moveCamera(CameraUpdateFactory.newLatLng(berlin));
+
+
+        mMap.setOnCameraChangeListener(
+                new OnCameraChangeListener() {
+
+                    public void onCameraChange(CameraPosition cameraPosition){
+                        //shape = drawCircle(mMap.getCameraPosition().target);
+                        //shape.setRadius(1000);
+                    }
+                }
+
+        );
+
+
+
+
+
     }
+
+    private Circle drawCircle(LatLng loc) {
+
+        Location markerLoc = new Location("Marker");
+        markerLoc.setLatitude(loc.latitude);
+        markerLoc.setLongitude(loc.longitude);
+
+        Location centerLoc = new Location("Center");
+        centerLoc.setLatitude(mMap.getCameraPosition().target.latitude);
+        centerLoc.setLongitude(mMap.getCameraPosition().target.longitude);
+
+        Float distance = centerLoc.distanceTo(markerLoc);
+
+
+        CircleOptions options = new CircleOptions()
+                .center(loc)
+                .radius(distance)
+                .fillColor(0x33000FF)
+                .strokeColor(Color.BLUE)
+                .strokeWidth(3);
+
+        return mMap.addCircle(options);
+    }
+
+    /*public double CalculationByDistance(LatLng StartP, LatLng EndP) {
+        int Radius = 6371;// radius of earth in Km
+        double lat1 = StartP.latitude;
+        double lat2 = EndP.latitude;
+        double lon1 = StartP.longitude;
+        double lon2 = EndP.longitude;
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+                + Math.cos(Math.toRadians(lat1))
+                * Math.cos(Math.toRadians(lat2)) * Math.sin(dLon / 2)
+                * Math.sin(dLon / 2);
+        double c = 2 * Math.asin(Math.sqrt(a));
+        double valueResult = Radius * c;
+        double km = valueResult / 1;
+        DecimalFormat newFormat = new DecimalFormat("####");
+        int kmInDec = Integer.valueOf(newFormat.format(km));
+        double meter = valueResult % 1000;
+        int meterInDec = Integer.valueOf(newFormat.format(meter));
+        Log.i("Radius Value", "" + valueResult + "   KM  " + kmInDec
+                + " Meter   " + meterInDec);
+
+        return Radius * c;
+    }*/
+
+
+/*    public GoogleMap.OnCameraChangeListener getCameraChangeListener()
+    {
+        return new GoogleMap.OnCameraChangeListener()
+        {
+            @Override
+            public void onCameraChange(CameraPosition position)
+            {
+                //addItemsToMap(this.items);
+                //shape = drawCircle(mMap.getCameraPosition().target);
+                LatLng berlin = new LatLng(52, 13);
+                shape = drawCircle(berlin);
+
+            }
+        };
+    }*/
+
+
+
 }
