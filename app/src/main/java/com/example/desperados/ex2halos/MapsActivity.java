@@ -18,6 +18,7 @@ package com.example.desperados.ex2halos;
 
         import com.google.android.gms.maps.CameraUpdateFactory;
         import com.google.android.gms.maps.GoogleMap;
+        import com.google.android.gms.maps.MapView;
         import com.google.android.gms.maps.OnMapReadyCallback;
         import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
         import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
@@ -164,18 +165,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             float ox = dx - ((mDispSize.x / 2) - 100);
                             float oy = dy - ((mDispSize.y / 2) - 100);
 
-                            if (ox < 0) ox = 0;
-                            if (oy < 0) oy = 0;
+                            if (ox < 100) ox = 0;
+                            if (oy < 100) oy = 0;
 
                             double radius = Math.sqrt((ox*ox) + (oy*oy));
                             float zoom = mMap.getCameraPosition().zoom;
-                            double scale = Math.pow(2, zoom);
+                            //double scale = Math.pow(2, zoom);
+                            double scale = 156543.03392 * Math.cos( mMap.getCameraPosition().target.latitude * Math.PI / 180) / Math.pow(2, zoom);
                             double alt_dist = radius * scale;
 
 
-                            Log.i("Radius", ""  + alt_dist );
-                            Log.i("Distance", ""  + distance );
 
+
+
+
+
+
+
+                            Log.i("Distance", ""  + distance);
+                            Log.i("Radius", ""  + radius );
+                            Log.i("Zoom", ""  + zoom );
+                            Log.i("Alt", ""  + alt_dist );
 
 
 
@@ -185,7 +195,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 /*                            Point cent_screen = projection.toScreenLocation(mMap.getCameraPosition());
 
-                            dx = abs(object.getCenter().longitude - mMap.getCameraPosition().target.longitude);
+                            dx = abs(float(object.getCenter().longitude) - mMap.getCameraPosition().target.longitude);
                             dy = abs(object.getCenter().latitude - mMap.getCameraPosition().target.latitude);
 
                             ox = dx - ((screenSize.x / 2) - padding);
@@ -201,7 +211,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
 
-                            object.setRadius(alt_dist*1000);
+                            object.setRadius(alt_dist);
 
                         }
 
@@ -233,13 +243,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         CircleOptions options = new CircleOptions()
                 .center(loc)
-                .radius(10000)
+                .radius(0)
                 .fillColor(0x33000FF)
                 .strokeColor(Color.BLUE)
                 .strokeWidth(3);
 
         return mMap.addCircle(options);
     }
+
+
+
+
+
 
     /*public double CalculationByDistance(LatLng StartP, LatLng EndP) {
         int Radius = 6371;// radius of earth in Km
