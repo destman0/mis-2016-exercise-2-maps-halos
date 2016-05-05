@@ -10,6 +10,7 @@
         android:id="@+id/et_marker"
         android:layout_alignParentTop="true"
         android:text="My Marker"
+        android:hint="Please enter maker name"
         android:layout_centerHorizontal="true" />
 
 
